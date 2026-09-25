@@ -22,17 +22,22 @@ jobs:
         with:
           gradle-version: '8.2'
 
-      - name: Extract Zip & Debug
+      - name: Extract Zip
         run: |
           unzip -o FloatingGemini.zip
-          echo "=== ISI FOLDER SETELAH EXTRACT ==="
-          ls -la
-          echo "=== CARI settings.gradle ==="
           find . -name "settings.gradle"
 
       - name: Fix Icon in Manifest
         run: |
           find . -name "AndroidManifest.xml" -exec sed -i 's|@mipmap/ic_launcher|@android:drawable/sym_def_app_icon|g' {} \;
+
+      - name: Create gradle.properties
+        run: |
+          PROJECT_DIR=$(find . -name "settings.gradle" | head -1 | xargs dirname)
+          echo "android.useAndroidX=true" > "$PROJECT_DIR/gradle.properties"
+          echo "android.enableJetifier=true" >> "$PROJECT_DIR/gradle.properties"
+          echo "=== ISI gradle.properties ==="
+          cat "$PROJECT_DIR/gradle.properties"
 
       - name: Build APK
         run: |
