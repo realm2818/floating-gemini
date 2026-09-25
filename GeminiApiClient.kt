@@ -12,7 +12,7 @@ import java.io.IOException
 
 object GeminiApiClient {
 
-    private const val API_KEY = "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"
+    private const val API_KEY = "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"
 
     private const val URL = "https://openrouter.ai/api/v1/chat/completions"
 
