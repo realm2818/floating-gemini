@@ -14,9 +14,9 @@ object GeminiApiClient {
 
     private const val API_KEY = "OPENROUTER_API_KEY"
 
+    private const val URL = "https://openrouter.ai/api/v1/chat/completions"
+
     private const val MODEL = "qwen/qwen3.8-27b:free"
-    // 🤖 GANTI MODEL DI SINI AJA KALAU MAU GANTI
-    private const val MODEL = "thinkingmachines/inkling-small:free"
 
     fun analyzeImage(bitmap: Bitmap, prompt: String, callback: (String) -> Unit) {
         val outputStream = ByteArrayOutputStream()
