@@ -22,10 +22,13 @@ jobs:
         with:
           gradle-version: '8.2'
 
-      - name: Extract Zip
+      - name: Extract Zip & Debug
         run: |
           unzip -o FloatingGemini.zip
+          echo "=== ISI FOLDER SETELAH EXTRACT ==="
           ls -la
+          echo "=== CARI settings.gradle ==="
+          find . -name "settings.gradle"
 
       - name: Fix Icon in Manifest
         run: |
@@ -33,11 +36,13 @@ jobs:
 
       - name: Build APK
         run: |
-          cd FLOATINGGEMINI
+          PROJECT_DIR=$(find . -name "settings.gradle" | head -1 | xargs dirname)
+          echo "Project dir: $PROJECT_DIR"
+          cd "$PROJECT_DIR"
           gradle assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: floating-gemini-apk
-          path: FLOATINGGEMINI/app/build/outputs/apk/debug/app-debug.apk
+          path: "**/app/build/outputs/apk/debug/app-debug.apk"
