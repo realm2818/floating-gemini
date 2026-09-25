@@ -22,6 +22,30 @@ jobs:
         with:
           gradle-version: '8.2'
 
+      # ⬇️ TAMBAH INI — Step buat setup fixed keystore
+      - name: Setup Fixed Keystore
+        run: |
+          mkdir -p ~/.android
+          if [ -f debug.keystore ]; then
+            cp debug.keystore ~/.android/debug.keystore
+            echo "✅ Pakai keystore yang udah ada"
+          else
+            keytool -genkey -v -keystore ~/.android/debug.keystore \
+              -storepass android -alias androiddebugkey -keypass android \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -dname "CN=Android Debug,O=Android,C=US"
+            cp ~/.android/debug.keystore debug.keystore
+            echo "✅ Generate keystore baru"
+          fi
+
+      - name: Upload Keystore
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-keystore
+          path: debug.keystore
+          if-no-files-found: warn
+      # ⬆️ SAMPAI SINI
+
       - name: Extract Zip
         run: |
           unzip -o FloatingGemini.zip
