@@ -16,8 +16,7 @@ object GeminiApiClient {
 
     private const val URL = "https://openrouter.ai/api/v1/chat/completions"
 
-    private const val MODEL = "qwen/qwen3.8-27b:free"
-
+    private const val MODEL = "mistralai/mistral-small-3.2-24b-instruct:free"
     fun analyzeImage(bitmap: Bitmap, prompt: String, callback: (String) -> Unit) {
         val outputStream = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
