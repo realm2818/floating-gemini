@@ -22,29 +22,27 @@ jobs:
         with:
           gradle-version: '8.2'
 
+      # 🔑 PAKAI KEYSTORE DARI REPO
       - name: Setup Keystore
         run: |
           mkdir -p ~/.android
           cp debug.keystore ~/.android/debug.keystore
-          echo "✅ Keystore fixed dari repo"
+          echo "✅ Keystore disetup dari repo"
 
       - name: Extract Zip
         run: |
           unzip -o FloatingGemini.zip
           find . -name "settings.gradle"
 
-      - name: Inject API Key
-        env:
-          API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-        run: |
-          sed -i "s|OPENROUTER_API_KEY|$API_KEY|g" GeminiApiClient.kt
-          echo "✅ API key diinject"
-
       - name: Override GeminiApiClient
         run: |
           TARGET=$(find . -path "*/floatinggemini/GeminiApiClient.kt" | head -1)
-          echo "Target: $TARGET"
-          cp GeminiApiClient.kt "$TARGET"
+          if [ -n "$TARGET" ] && [ -f GeminiApiClient.kt ]; then
+            cp GeminiApiClient.kt "$TARGET"
+            echo "✅ GeminiApiClient di-override"
+          else
+            echo "⚠️ Skip override (file nggak ditemukan)"
+          fi
 
       - name: Fix Icon in Manifest
         run: |
