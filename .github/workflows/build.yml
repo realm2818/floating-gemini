@@ -22,7 +22,6 @@ jobs:
         with:
           gradle-version: '8.2'
 
-      # 🔑 PAKAI KEYSTORE DARI REPO
       - name: Setup Keystore
         run: |
           mkdir -p ~/.android
@@ -39,9 +38,6 @@ jobs:
           TARGET=$(find . -path "*/floatinggemini/GeminiApiClient.kt" | head -1)
           if [ -n "$TARGET" ] && [ -f GeminiApiClient.kt ]; then
             cp GeminiApiClient.kt "$TARGET"
-            echo "✅ GeminiApiClient di-override"
-          else
-            echo "⚠️ Skip override (file nggak ditemukan)"
           fi
 
       - name: Fix Icon in Manifest
