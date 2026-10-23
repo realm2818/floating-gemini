@@ -2,62 +2,48 @@ name: Build APK
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: temurin
+          java-version: 17
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+      - uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.2'
+          gradle-version: 8.5
 
-      - name: Setup Keystore
+      - name: Cari proyek
+        id: proj
         run: |
-          mkdir -p ~/.android
-          cp debug.keystore ~/.android/debug.keystore
-          echo "✅ Keystore disetup dari repo"
-
-      - name: Extract Zip
-        run: |
-          unzip -o FloatingGemini.zip
-          find . -name "settings.gradle"
-
-      - name: Override GeminiApiClient
-        run: |
-          TARGET=$(find . -path "*/floatinggemini/GeminiApiClient.kt" | head -1)
-          if [ -n "$TARGET" ] && [ -f GeminiApiClient.kt ]; then
-            cp GeminiApiClient.kt "$TARGET"
+          if [ -f FloatingApp.zip ]; then
+            unzip -o -q FloatingApp.zip
           fi
+          SETTINGS=$(grep -rl --include=settings.gradle 'rootProject.name = "FloatingApp"' . | head -n 1 || true)
+          if [ -z "$SETTINGS" ]; then
+            echo "Proyek FloatingApp tidak ditemukan. Isi repo:"
+            ls -la
+            exit 1
+          fi
+          DIR=$(dirname "$SETTINGS")
+          echo "Proyek ada di: $DIR"
+          echo "dir=$DIR" >> "$GITHUB_OUTPUT"
 
-      - name: Fix Icon in Manifest
-        run: |
-          find . -name "AndroidManifest.xml" -exec sed -i 's|@mipmap/ic_launcher|@android:drawable/sym_def_app_icon|g' {} \;
+      - name: Build debug APK
+        working-directory: ${{ steps.proj.outputs.dir }}
+        run: gradle assembleDebug --no-daemon
 
-      - name: Create gradle.properties
-        run: |
-          PROJECT_DIR=$(find . -name "settings.gradle" | head -1 | xargs dirname)
-          echo "android.useAndroidX=true" > "$PROJECT_DIR/gradle.properties"
-          echo "android.enableJetifier=true" >> "$PROJECT_DIR/gradle.properties"
-
-      - name: Build APK
-        run: |
-          PROJECT_DIR=$(find . -name "settings.gradle" | head -1 | xargs dirname)
-          cd "$PROJECT_DIR"
-          gradle assembleDebug
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
-          name: floating-gemini-apk
-          path: "**/app/build/outputs/apk/debug/app-debug.apk"
+          name: FloatingApp-debug-apk
+          path: ${{ steps.proj.outputs.dir }}/app/build/outputs/apk/debug/*.apk
